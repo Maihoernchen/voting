@@ -1,5 +1,6 @@
 <?php
-require ("aha.php");
+$succes = require ("aha.php");
+echo ($succes);
 if(isset($_POST["submit"])) {
     $iserv = $_POST["iserv"];
     $stmt = $conn->prepare("SELECT * FROM suskuks WHERE iserv=:iserv;");

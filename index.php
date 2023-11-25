@@ -1,6 +1,6 @@
 <?
 
-if (!$_SESSION['iserv'] AND !$_COOKIE['iserv']) {
+if (!isset($_SESSION['iserv']) AND !isset($_COOKIE['iserv'])) {
 echo '
 <!DOCTYPE html>
 <html lang="en">
@@ -16,5 +16,7 @@ echo '
   <a href="register.php">Register</a>
   </body>
 </html>';
+} elseif ($_SESSION['iserv']) {
+  echo 'Welcome '.$_SESSION['iserv'];
 }
 ?>
