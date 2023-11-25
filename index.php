@@ -14,7 +14,6 @@ echo '
         <input type="password" name="passw" placeholder="ISERV-Passwort" required><br>
         <button type="submit" name="submit">Log In</button>
     </form>
-  <a href="register.php">Register</a>
   </body>
 </html>';
 } elseif (isset($_SESSION['iserv'])) {
