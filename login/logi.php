@@ -1,12 +1,11 @@
 <?php
-$succes = require ('aha.php');
-echo ($succes);
+require ('aha.php');
 if(isset($_POST['submit'])) {
     $iserv = $_POST['iserv'];
     $passw = $_POST['passw'];
     if (!iservLogin($iserv, $passw)) {
         echo('Anmeldung fehlgeschlagen. Iserv-Login falsch.<br>');
-        echo('<a href="../"');
+        echo('<a href="../">Back</a>');
     } else {
         header('Location: ../');
     }
