@@ -11,12 +11,15 @@ echo '
   <body>
     <form action="login/logi.php" method="post">
         <input type="text" name="iserv" placeholder="ISERV-Mail-Adresse" required><br>
+        <input type="password" name="passw" placeholder="ISERV-Passwort" required><br>
         <button type="submit" name="submit">Log In</button>
     </form>
   <a href="register.php">Register</a>
   </body>
 </html>';
-} elseif ($_SESSION['iserv']) {
+} elseif (isset($_SESSION['iserv'])) {
   echo 'Welcome '.$_SESSION['iserv'];
+} else {
+  echo 'Welcome '.$_COOKIE['iserv'];
 }
 ?>
