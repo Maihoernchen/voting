@@ -29,14 +29,11 @@ if (isset($_POST['addVote'])) {
     $stmt = $GLOBALS['conn']->prepare('SELECT id,meaning from '.$survey.'_options;');
     $stmt->execute();
     $options = $stmt->fetchAll();
-    if ($properties['multiplePossible']) {
-        foreach ($options as $key=>$option) {
-            echo '<label>'.$option['meaning'].'</label><input class="el" name='.$option['id'].' type=checkbox id='.$option['id'].' value='.$option['id'].'>';
-        }
-    } else {
-        foreach ($options as $key=>$option) {
-            echo '<label>'.$option['meaning'].'</label><input class="el" name="yes" type=radio id='.$option['id'].' value='.$option['id'].'>';
-        }
+    // shorthand if to set checkbox type
+    $type = $properties['multiplePossible'] ? 'check' : 'radio';
+    // generate checkboxes with same name for radio buttons and brackets for checkboxes
+    foreach ($options as $key=>$option) {
+        echo '<label>'.$option['meaning'].'</label><input class="el" name="yes" type=' . $type . ' id='.$option['id'].' value='.$option['id'].'>';
     }
     
     echo '<input type="submit" name="vote" value="Add Vote"></form></main></html>';

@@ -16,7 +16,8 @@ if(isset($_POST['create'])) {
     }
 } elseif (isset($_POST['vote'])) {
     print_r($_POST);
-    foreach ($_POST as $key=>$value) {
+    // read the checked values
+    foreach ($_POST['yes'] as $key=>$value) {
         echo $key.' = '.$value;
         if ($key != 'vote') {
             addVote($_GET['survey'],$value);
