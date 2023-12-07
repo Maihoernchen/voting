@@ -11,14 +11,57 @@ if (!isset($_SESSION['auth'])) {
     <html lang="en">
       <head>
         <meta charset="utf-8">
-        <title>Login</title>
+        <title>Umfragen</title>
+        <link rel="stylesheet" href="css/user.css">
+        <script src="js/user.js"></script>
       </head>
-      <body>
-        <form action="user.php" method="post">
-            <input type="checkbox" name="" placeholder="ISERV-Mail-Adresse" required><br>
-            <input type="checkbox" name="passw" placeholder="ISERV-Passwort" required><br>
-            <button type="submit" name="vote">Log In</button>
-        </form>
-      </body>
+      <body>';
+    $stmt = $GLOBALS['conn']->prepare('SELECT table_name FROM information_schema.tables WHERE table_schema = "maihoernchen_users";');
+    $stmt->execute();
+    $tables = $stmt->fetchAll();
+    $defaults = ['GSV','users','admins'];
+    $active = array();
+    $passed = array();
+    foreach ($tables as $key=>$content) {
+      $table = $content['table_name'];
+      if (!in_array($table, $defaults) AND !str_contains($table, '_options')) {
+        $stmt = $GLOBALS['conn']->prepare('SELECT descr,expirationDate,active FROM '.$table.' WHERE iserv=0;');
+        $stmt->execute();
+        $properties = $stmt->fetchAll()[0];
+        if (time() < strtotime($properties['expirationDate'])) {
+          if ($properties['active']) {
+            array_push($active, array('name' => $table, 'descr' => $properties['descr']));
+          }
+        } else {
+          $stmt = $GLOBALS['conn']->prepare('UPDATE '.$table.' SET active = false WHERE iserv=0;');
+          $stmt->execute();
+          if((time()-(60*60*24*30)) < strtotime($properties['expirationDate'])) {
+            array_push($passed, array('name' => $table, 'descr' => $properties['descr']));
+          }
+        }
+      }
+    }
+    echo '<div id=main>
+    <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="documentation.php">Über dieses Programm</a>
+    <a href="archive.php">Archiv</a>
+    <a href="index.php">Mode Select</a>
+    <a href="logout.php">Logout</a>
+    </div>
+    <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; Menü</span>';
+    echo '<div id=active><h1>Aktive Umfragen</h1>';
+    foreach ($active as $key=>$value) {
+      echo '<div class="survey" style="border-style:double"><a href="view.php?survey='.$value['name'].'"><h2>'.$value['name'].'</h2><h4>'.$value['descr'].'</h4></a></div>';
+    }
+    echo '</div>';
+    echo '<div id=passed><h1>Vergangene Umfragen</h1>';
+    foreach ($passed as $key=>$value) {
+      echo '<div class="survey" style="border-style:double"><a href="view.php?survey='.$value['name'].'"><h2>'.$value['name'].'</h2><h4>'.$value['descr'].'</h4></a></div>';
+    }
+    echo '</div>';
+    echo '
+    </div>
+    </body>
     </html>';
 }

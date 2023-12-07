@@ -13,7 +13,7 @@ if (!isset($_SESSION['auth'])) {
           <head>
             <meta charset="utf-8">
             <title>Login</title>
-            <script type="text/javascript" src="admin.js"></script>
+            <script type="text/javascript" src="js/admin.js"></script>
           </head>
           <body>
           </body>

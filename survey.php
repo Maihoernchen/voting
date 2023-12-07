@@ -2,6 +2,8 @@
 
 require ('login/aha.php');
 
+session_start();
+
 if(isset($_POST['create'])) {
     $survey = json_decode($_COOKIE['survey'], true);
     if (isset($survey['1']) AND isset($survey['name']) AND isset($survey['descr'])) {
@@ -10,10 +12,16 @@ if(isset($_POST['create'])) {
         createSurvey ($survey);
         header('Location: admin.php');
     } else {
-        echo 'keine optionen angegeben <br> <a href="admin.php">zurück</a>';
+        echo 'Attribut fehlt. <br> <a href="admin.php">zurück</a>';
     }
 } elseif (isset($_POST['vote'])) {
-    addVote('Moin','Maista');
+    print_r($_POST);
+    foreach ($_POST as $key=>$value) {
+        echo $key.' = '.$value;
+        if ($key != 'vote') {
+            addVote($_GET['survey'],$value);
+        }
+    }
 }
 
 
@@ -26,21 +34,25 @@ function createSurvey ($survey) {
     }
     $name = $survey['name'];
     $descr = $survey['descr'];
+    $expirationDate = $survey['expirationDate'];
+    $active = true;
     $multiplePossible = $survey['multiplePossible'];
     $optionsNumber  = count($options);
-    createVoted($name, $optionsNumber, $descr, $multiplePossible);
+    createVoted($name, $optionsNumber, $descr, $multiplePossible, $expirationDate, $active);
     createOptions($name, $options);
 }
 
 
 
-function createVoted ($name, $optionsNumber, $descr, $multiplePossible) {
-    $stmt = $GLOBALS['conn']->prepare('CREATE TABLE '.$name.' (iserv VARCHAR(255) PRIMARY KEY, optionsNumber INT(8), multiplePossible BOOLEAN, descr VARCHAR(255));');
+function createVoted ($name, $optionsNumber, $descr, $multiplePossible, $expirationDate, $active) {
+    $stmt = $GLOBALS['conn']->prepare('CREATE TABLE '.$name.' (iserv VARCHAR(255) PRIMARY KEY, optionsNumber INT(8), multiplePossible BOOLEAN, descr VARCHAR(255), expirationDate DATETIME, active BOOLEAN);');
     $stmt->execute();
-    $stmt = $GLOBALS['conn']->prepare('INSERT INTO '.$name.' (iserv, optionsNumber, multiplePossible, descr) VALUES (0, :optionsNumber, :multiplePossible, :descr);');
+    $stmt = $GLOBALS['conn']->prepare('INSERT INTO '.$name.' (iserv, optionsNumber, multiplePossible, descr, expirationDate, active) VALUES (0, :optionsNumber, :multiplePossible, :descr, :expirationDate, :active);');
     $stmt->bindParam(':optionsNumber', $optionsNumber);
     $stmt->bindParam(':multiplePossible', $multiplePossible);
     $stmt->bindParam(':descr', $descr);
+    $stmt->bindParam(':expirationDate', $expirationDate);
+    $stmt->bindParam(':active', $active);
     $stmt->execute();
 }
 
@@ -67,7 +79,7 @@ function addVote($name, $option) {
     $stmt->bindParam(':iserv', $_SESSION['iserv']);
     $stmt->execute();
     $av = $stmt->fetchAll();
-    $stmt = $GLOBALS['conn']->prepare('SELECT * FROM '.$name.' WHERE id=:option');
+    $stmt = $GLOBALS['conn']->prepare('SELECT * FROM '.$name.'_options WHERE id=:option');
     $stmt->bindParam(':option', $option);
     $stmt->execute();
     $opt = $stmt->fetchAll();
