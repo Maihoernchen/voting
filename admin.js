@@ -4,13 +4,18 @@ function main () {
     var name = document.createElement('input');
     name.id = 'name';
     name.type = 'text';
-    name.value = 'Name der Umfrage';
+    name.placeholder = 'Name der Umfrage';
     document.body.appendChild(name);
     var descr = document.createElement('input');
     descr.id = 'descr';
     descr.type = 'text';
-    descr.value = 'Beschreibung der Umfrage';
+    descr.placeholder = 'Beschreibung der Umfrage';
     document.body.appendChild(descr);
+    var expirationDate = document.createElement('input');
+    expirationDate.id = 'expirationDate';
+    expirationDate.type = 'text';
+    expirationDate.placeholder = 'YYYY-MM-DD HH:MI:SS';
+    document.body.appendChild(expirationDate);
     var multiplePossible = document.createElement('input');
     multiplePossible.id = 'multiplePossible';
     multiplePossible.type = 'checkbox';
@@ -21,7 +26,7 @@ function main () {
     document.body.innerHTML += ' <form action="survey.php" method="post" onsubmit="return validateForm()" name="survey"><input type="submit" name="create" value="Create"></form>';
     document.getElementById('addOption').addEventListener('click', addOption);
     document.getElementById('addSlider').addEventListener('click', addSlider);
-    renderOptions()
+    renderOptions();
 }
 
 function addOption () {
@@ -42,7 +47,7 @@ function addOption () {
         document.getElementById('option').appendChild(optionSubmit);
         document.getElementById('optionSubmit').addEventListener('click', optionToCookie);
     }
-    renderOptions()
+    renderOptions();
 }
 
 function optionToCookie() {
@@ -102,6 +107,7 @@ function validateForm () {
     let name = document.getElementById('name').value;
     let descr = document.getElementById('descr').value;
     let multiplePossible = document.getElementById('multiplePossible').checked;
+    let expirationDate = document.getElementById('expirationDate').value;
     let options = confirmOptions();
     if (name == "") {
         alert("Name must be filled out");
@@ -116,6 +122,7 @@ function validateForm () {
         options['name'] = name;
         options['descr'] = descr;
         options['multiplePossible'] = multiplePossible;
+        options['expirationDate'] = expirationDate;
         document.cookie = 'survey='+JSON.stringify(options);
         return true;
     }

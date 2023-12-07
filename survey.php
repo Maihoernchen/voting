@@ -17,12 +17,7 @@ if(isset($_POST['create'])) {
 } elseif (isset($_POST['vote'])) {
     print_r($_POST);
     // read the checked values
-    foreach ($_POST['yes'] as $key=>$value) {
-        echo $key.' = '.$value;
-        if ($key != 'vote') {
-            addVote($_GET['survey'],$value);
-        }
-    }
+    addVote($_GET['survey'],$_POST['yes']);
 }
 
 
@@ -80,18 +75,19 @@ function addVote($name, $option) {
     $stmt->bindParam(':iserv', $_SESSION['iserv']);
     $stmt->execute();
     $av = $stmt->fetchAll();
-    $stmt = $GLOBALS['conn']->prepare('SELECT * FROM '.$name.'_options WHERE id=:option');
-    $stmt->bindParam(':option', $option);
-    $stmt->execute();
-    $opt = $stmt->fetchAll();
-    $av = $stmt->fetchAll();
     if ($av) {
         echo 'You already voted. <br> <a href="index.php">Go back.</a>';
     } else {
-        $stmt = $GLOBALS['conn']->prepare('INSERT INTO '.$name.'_options WHERE iserv=:iserv (iserv, votes) VALUES (:iserv, :option)');
+        $stmt = $GLOBALS['conn']->prepare('INSERT INTO '.$name.' (iserv) VALUES (:iserv)');
         $stmt->bindParam(':iserv', $_SESSION['iserv']);
-        $stmt->bindParam(':option', $opt);
         $stmt->execute();
-        $av = $stmt->fetchAll();
+        foreach ($option as $key=>$value) {
+            if ($key!='vote') {
+                $stmt = $GLOBALS['conn']->prepare('UPDATE '.$name.'_options SET votes = votes + :value WHERE id=:id');
+                $stmt->bindParam(':id', $key);
+                $stmt->bindParam(':value', $value);
+                $stmt->execute();
+            }
+        }
     }
 }
