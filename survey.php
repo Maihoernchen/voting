@@ -16,7 +16,9 @@ if(isset($_POST['create'])) {
         echo 'Attribut fehlt. <br> <a href="admin.php">zurück</a>';
     }
 } elseif (isset($_POST['vote'])) {
-    addVote($_GET['survey'],$_POST);
+    print_r($_POST);
+    // read the checked values
+    addVote($_GET['survey'],$_POST['yes']);
 }
 
 
@@ -95,9 +97,12 @@ function addVote($name, $option) {
         $stmt->bindParam(':iserv', $_SESSION['iserv']);
         $stmt->execute();
         foreach ($option as $key=>$value) {
-            $stmt = $GLOBALS['conn']->prepare('UPDATE '.$name.'_options SET votes = votes + 1 WHERE id=:id');
-            $stmt->bindParam(':id', $value);
-            $stmt->execute();
+            if ($key!='vote') {
+                $stmt = $GLOBALS['conn']->prepare('UPDATE '.$name.'_options SET votes = votes + :value WHERE id=:id');
+                $stmt->bindParam(':id', $key);
+                $stmt->bindParam(':value', $value);
+                $stmt->execute();
+            }
         }
         echo 'Stimme hinzugefügt. Möchten Sie noch Feedback geben, oder einen Vorschlag machen? <br>
         <form action="survey.php">
