@@ -1,10 +1,12 @@
 <?php
 
 require ('survey.php');
+require('r.php');
 
 session_start();
 
 if (!isset($_SESSION['auth'])) {
+  header("HTTP/1.1 403 Forbidden");
     echo '403 Access Denied<br><a href="./">Go back</a>';
 } elseif ($_SESSION['auth'] == 'admin' OR $_SESSION['auth'] == 'user') {
     echo '<!DOCTYPE html>
@@ -44,10 +46,14 @@ if (!isset($_SESSION['auth'])) {
     echo '<div id=main>
     <div id="mySidenav" class="sidenav">
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="user.php">Startseite</a>
     <a href="documentation.php">Über dieses Programm</a>
     <a href="archive.php">Archiv</a>
-    <a href="index.php">Mode Select</a>
-    <a href="logout.php">Logout</a>
+    ';
+    if (isset($_SESSION['auth']) AND $_SESSION['auth']=='admin') {
+      echo '<a href="index.php">Mode Select</a>';
+    }
+    echo '<a href="logout.php">Logout</a>
     </div>
     <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; Menü</span>';
     echo '<div id=active><h1>Aktive Umfragen</h1>';

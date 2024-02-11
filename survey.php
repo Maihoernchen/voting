@@ -1,6 +1,7 @@
 <?php
 
 require ('login/aha.php');
+require('r.php');
 
 session_start();
 
@@ -73,18 +74,35 @@ function addVote($name, $option) {
     $stmt->bindParam(':iserv', $_SESSION['iserv']);
     $stmt->execute();
     $av = $stmt->fetchAll();
+    $stmt = $GLOBALS['conn']->prepare('SELECT expirationDate FROM '.$name.' WHERE iserv=0');
+    $stmt->execute();
+    $eD = $stmt->fetchAll()[0];
+    $stmt = $GLOBALS['conn']->prepare('SELECT multiplePossible FROM '.$name.' WHERE iserv=0');
+    $stmt->execute();
+    $mP = $stmt->fetchAll();
+    unset($option['vote']);
     if ($av) {
-        echo 'You already voted. <br> <a href="index.php">Go back.</a>';
+        header("HTTP/1.1 405 Method Not Allowed");
+        echo 'You already voted. <br> <a href="user.php">Go back.</a>';
+    } elseif (time() > $eD) {
+        header("HTTP/1.1 410 Gone");
+        echo 'Die Umfrage ist vergangen und nimmt keine Stimmen mehr an. <a href="user.php">Go Back</a>';
+    } elseif ($mP AND count($option)>1) {
+        header("HTTP/1.1 400 Bad Request");
+        echo 'Sie haben mehrere Stimmen abgegeben, aber die Umfrage nimmt maximal eine an. <a href="user.php">Go Back</a>';
     } else {
         $stmt = $GLOBALS['conn']->prepare('INSERT INTO '.$name.' (iserv) VALUES (:iserv)');
         $stmt->bindParam(':iserv', $_SESSION['iserv']);
         $stmt->execute();
         foreach ($option as $key=>$value) {
-            if ($key!='vote') {
-                $stmt = $GLOBALS['conn']->prepare('UPDATE '.$name.'_options SET votes = votes + 1 WHERE id=:id');
-                $stmt->bindParam(':id', $value);
-                $stmt->execute();
-            }
+            $stmt = $GLOBALS['conn']->prepare('UPDATE '.$name.'_options SET votes = votes + 1 WHERE id=:id');
+            $stmt->bindParam(':id', $value);
+            $stmt->execute();
         }
+        echo 'Stimme hinzugefügt. Möchten Sie noch Feedback geben, oder einen Vorschlag machen? <br>
+        <form action="survey.php">
+        <input type="text" id="feedback"> <br> 
+        <input type="submit" name="noFeedback" value="Feedback überspringen"><input type="submit" name="Feedback" value="Feedback abschicken">
+        </form>';
     }
 }

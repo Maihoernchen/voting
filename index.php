@@ -1,5 +1,6 @@
 <?
 require ('login/logi.php');
+require('r.php');
 
 session_start();
 
@@ -21,8 +22,6 @@ function renderSignIn () {
         </html>
     ';
 }
-
-
 
 if (isset($_SESSION['auth'])) {
   if ($_SESSION['auth'] == 'admin') {
